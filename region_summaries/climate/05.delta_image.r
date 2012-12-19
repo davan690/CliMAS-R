@@ -21,52 +21,55 @@ for (clim.var in clim.vars) {
 
 	for (i in 1:length(files)) {cat(files[i],'\n')
 		tasc=read.asc.gz(paste(files[i],'.asc.gz',sep=''))
-		if (clim.var==clim.vars[2]) {tasc[which(tasc>150)]=150; tasc[which(tasc<=-150)]=-150; }
+		if (clim.var==clim.vars[2]) {tasc[which(tasc>200)]=200; tasc[which(tasc<=-200)]=-200; }
 		assign(files[i],tasc) #saves ascii in memory as name of file. ie. RCP3PD.10th
 		pos[,files[i]]=extract.data(cbind(pos$lon,pos$lat),get(files[i]))
 	}
 
-	vois=c('state','nrm','ibra')
+	vois=c('State','NRM','IBRA')
 	# for (clim.var in clim.vars){ cat(clim.var, '\n')
 
 	for (voi in vois) {cat (voi, '\n')
-		#set state/nrm/ibra dir
-		voi.dir=paste(out.dir, voi,'/',sep=''); setwd(voi.dir)
+		setwd(out.dir)
 		#identify regions
-		regions=list.files()
+		regions=list.files(pattern=voi)
+		
 		
 		pos[,voi]=extract.data(cbind(pos$lon,pos$lat),read.asc(paste(layer.dir, voi,'.asc',sep='')))
 
-		if (voi=='state') { polys=readShapePoly(paste(layer.dir,'Shapefile/STE11aAust.shp',sep=''))
-							polys@data[,voi]=polys@data$STATE_CODE}
-		if (voi=='nrm') {   polys=readShapePoly(paste(layer.dir,'Shapefile/NRM_Regions_2010.shp',sep=''))
-							polys@data[,voi]=c(0:63)}
-		if (voi=='ibra') {  polys=readShapePoly(paste(layer.dir,'Shapefile/IBRA7_regions.shp',sep=''))
-							polys@data[,voi]=polys@data$OBJECTID}
+		if (voi==vois[1]) { polys=readShapePoly(paste(layer.dir,'Shapefile/STE11aAust.shp',sep=''));
+							polys@data[,voi]=polys@data$STATE_NAME ;
+							polys@data$regioncode=polys@data$STATE_CODE}
+		if (voi==vois[2]) { polys=readShapePoly(paste(layer.dir,'Shapefile/NRM_Regions_2010.shp',sep=''));
+							polys@data[,voi]=polys@data$NRM_REGION;
+							polys@data$regioncode=c(0:63)}
+		if (voi==vois[3]) { polys=readShapePoly(paste(layer.dir,'Shapefile/IBRA7_regions.shp',sep=''));
+							polys@data[,voi]=polys@data$REG_NAME_7;
+							polys@data$regioncode=polys@data$OBJECTID}
 							
 		
 
 		for (region in regions) {cat (region, '\n')
-			region.dir=paste(voi.dir, region,'/',sep='');setwd(region.dir)
+			region.dir=paste(out.dir, region,'/',sep='');setwd(region.dir)
+			region.name=sub('[^_]+_','',region); #eat everything before the first underscore, and the first underscore
+			region.name=gsub('_',' ',region.name)
+			region.code=polys@data$regioncode[which(polys@data[,voi]==region.name)]
 			
+			if (clim.var==clim.vars[1]) cols=colorRampPalette(c("#A50026","#D73027","#F46D43","#FDAE61","#FEE090","#FFFFBF","#E0F3F8","#ABD9E9","#74ADD1","#4575B4","#313695"))(100); cols=cols[100:1] ; zlim=c(-7,7)
+			if (clim.var==clim.vars[2])  cols=colorRampPalette(c('#6E3D27','#A3451C','#BA8D45','#FFD600','yellow','olivedrab1','#39D834','#22BC48','#3A856B','#1B5B55'))(100); zlim=c(-200,200)
+
+
+			# dim.col=adjustcolor('grey50',alpha.f=0.4)
 			
-			cols=colorRampPalette(c("#A50026","#D73027","#F46D43","#FDAE61","#FEE090","#FFFFBF","#E0F3F8","#ABD9E9","#74ADD1","#4575B4","#313695"))(100)
-			if (clim.var==clim.vars[1]) { cols=cols[100:1] ; zlim=c(-7,7)}
-			if (clim.var==clim.vars[2]) { cols=cols ; zlim=c(-150,150)}
-			
-			dim.col=adjustcolor('grey50',alpha.f=0.4)
-			
-			tpoly=polys[which(polys@data[,voi]==region),]
-			if (voi=='state') {  region.name=polys$STATE_NAME[which(polys@data[,voi]==region)] }
-			if (voi=='nrm') {  region.name=polys$NRM_REGION[which(polys@data[,voi]==region)] }
-			if (voi=='ibra') {  region.name=polys$REG_NAME_7[which(polys@data[,voi]==region)] }
-			pos$region=NA
-			pos$region[which(pos[,voi]==region)]=1
+			tpoly=polys[which(polys@data[,voi]==region.name),]
 
 			
-			pos$mask=1
-			pos$mask[which(pos[,voi]==region)]=NA
-			region.mask=make.asc(pos$mask)
+			# pos$region=NA
+			# pos$region[which(pos[,voi]==region.code)]=1
+
+			# pos$mask=1
+			# pos$mask[which(pos[,voi]==region)]=NA
+			# region.mask=make.asc(pos$mask)
 			
 			assign.list(min.lon,max.lon,min.lat,max.lat) %=% fixed.zoom(pos$region, 1, 2)
 			
@@ -99,7 +102,7 @@ for (clim.var in clim.vars) {
 
 					image(blank.asc, ann=FALSE,axes=FALSE,col='grey90',xlim=xlim,ylim=ylim) 			
 					image(get(files[i]), ann=FALSE,axes=FALSE,col=cols, zlim=zlim, xlim=xlim,ylim=ylim,add=TRUE)
-					image(region.mask, ann=FALSE,axes=FALSE,col=dim.col, zlim=zlim,xlim=xlim,ylim=ylim,add=TRUE)
+					# image(region.mask, ann=FALSE,axes=FALSE,col=dim.col, zlim=zlim,xlim=xlim,ylim=ylim,add=TRUE)
 					plot(tpoly,add=TRUE,border='grey20',lwd=2)
 					
 					if (i==1) { mtext('Low (RCP4.5)', line=1,side=3,cex=2,font=2)
@@ -111,9 +114,9 @@ for (clim.var in clim.vars) {
 					if (i==4) { mtext('High (RCP8.5)', line=1,side=3,cex=2,font=2)}
 				
 				}
-				par(mar=c(1,1,0,2))
+				par(mar=c(1,1,0,1))
 				image(base.asc, ann=FALSE,axes=FALSE,col='grey70')
-				plot(tpoly,add=TRUE,col="#D73027",border="#D73027")
+				plot(tpoly,add=TRUE,col="black",border="black")
 				
 				plot(1:20,axes=FALSE, ann=FALSE,type = "n")
 				text(0.2, 17, 'Figure 1: Change in annual mean temperature for a low and high emissions scenario in 2085.', cex=2,pos=4)

@@ -55,21 +55,21 @@ dev.off()
 
 }
 
-vois=c('state','nrm','ibra')
+vois=c('State','NRM','IBRA')
 ESs=c('RCP45','RCP85')
 YEARs=seq(2015,2085,10)
-clim.vars=c('bioclim_01','bioclim_12')
+clim.vars=c('temperature','rainfall')
 cols=c('orange','dodgerblue')
 
 for (clim.var in clim.vars){ cat(clim.var, '\n')
 	
 	for (voi in vois) {cat (voi, '\n')
-		#set state/nrm/ibra dir
-		voi.dir=paste(out.dir, voi,'/',sep=''); setwd(voi.dir)
+		setwd(out.dir)
 		#identify regions
-		regions=list.files()
+		regions=list.files(pattern=voi)
+
 		for (region in regions) {cat (region, '\n')
-			region.dir=paste(voi.dir, region,'/',sep='');setwd(region.dir)
+			region.dir=paste(out.dir, region,'/',sep='');setwd(region.dir)
 			climdata=read.csv(paste('regional.summary.',clim.var,'.csv',sep=''),as.is=TRUE)
 			climdata=climdata[which(climdata$RCP=='RCP45' | climdata$RCP=='RCP85'),]
 			climdata=climdata[,c('RCP','percentile.yr','mean')]
