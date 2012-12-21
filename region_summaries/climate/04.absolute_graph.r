@@ -59,7 +59,7 @@ vois=c('State','NRM','IBRA')
 ESs=c('RCP45','RCP85')
 YEARs=seq(2015,2085,10)
 clim.vars=c('temperature','rainfall')
-cols=c('orange','dodgerblue')
+cols=c('orange','#3A856B')
 
 for (clim.var in clim.vars){ cat(clim.var, '\n')
 	

@@ -10,7 +10,7 @@ base.asc = read.asc.gz('/home/jc165798/Climate/CIAS/Australia/5km/baseline.76to0
 pos=make.pos(base.asc)
 blank.asc=base.asc; blank.asc[which(is.na(blank.asc))]=0
 
-clim.vars=c('bioclim_01','bioclim_12')
+clim.vars=c('temperature','rainfall')
 
 for (clim.var in clim.vars) {
 	asc.dir=paste(delta.dir,clim.var,'/',sep=''); setwd(asc.dir)
@@ -21,7 +21,7 @@ for (clim.var in clim.vars) {
 
 	for (i in 1:length(files)) {cat(files[i],'\n')
 		tasc=read.asc.gz(paste(files[i],'.asc.gz',sep=''))
-		if (clim.var==clim.vars[2]) {tasc[which(tasc>200)]=200; tasc[which(tasc<=-200)]=-200; }
+		if (clim.var==clim.vars[2]) {tasc[which(tasc>500)]=500; tasc[which(tasc<=-500)]=-500; }
 		assign(files[i],tasc) #saves ascii in memory as name of file. ie. RCP3PD.10th
 		pos[,files[i]]=extract.data(cbind(pos$lon,pos$lat),get(files[i]))
 	}
@@ -55,17 +55,15 @@ for (clim.var in clim.vars) {
 			region.name=gsub('_',' ',region.name)
 			region.code=polys@data$regioncode[which(polys@data[,voi]==region.name)]
 			
-			if (clim.var==clim.vars[1]) cols=colorRampPalette(c("#A50026","#D73027","#F46D43","#FDAE61","#FEE090","#FFFFBF","#E0F3F8","#ABD9E9","#74ADD1","#4575B4","#313695"))(100); cols=cols[100:1] ; zlim=c(-7,7)
-			if (clim.var==clim.vars[2])  cols=colorRampPalette(c('#6E3D27','#A3451C','#BA8D45','#FFD600','yellow','olivedrab1','#39D834','#22BC48','#3A856B','#1B5B55'))(100); zlim=c(-200,200)
+			if (clim.var==clim.vars[1]) {cols=colorRampPalette(c("#A50026","#D73027","#F46D43","#FDAE61","#FEE090","#FFFFBF","#f0f9dc","#E0F3F8"))(100); cols=cols[100:1] ; zlim=c(-1,7) }
+			if (clim.var==clim.vars[2]) { cols=colorRampPalette(c('#6E3D27','#A3451C','#d08d0e','#FFD600','#ffff63','#cbff61','#5bd857','#39BA6A','#2a895f','#1B5B55'))(100); zlim=c(-500,500) }
 
-
-			# dim.col=adjustcolor('grey50',alpha.f=0.4)
 			
 			tpoly=polys[which(polys@data[,voi]==region.name),]
 
 			
-			# pos$region=NA
-			# pos$region[which(pos[,voi]==region.code)]=1
+			pos$region=NA
+			pos$region[which(pos[,voi]==region.code)]=1
 
 			# pos$mask=1
 			# pos$mask[which(pos[,voi]==region)]=NA
@@ -73,7 +71,7 @@ for (clim.var in clim.vars) {
 			
 			assign.list(min.lon,max.lon,min.lat,max.lat) %=% fixed.zoom(pos$region, 1, 2)
 			
-			if (max.lat>=-18 & min.lat<=-34 |
+			if (max.lat>=-12 & min.lat<=-36.5 |
 				max.lon>=148 & min.lon<=120 ) { 
 				xlim=c(min(pos$lon),max(pos$lon)); 
 				ylim=c(min(pos$lat),max(pos$lat))
@@ -99,10 +97,10 @@ for (clim.var in clim.vars) {
 					layout(mat) #call layout as defined above
 
 				for (i in 1:6) {
-
-					image(blank.asc, ann=FALSE,axes=FALSE,col='grey90',xlim=xlim,ylim=ylim) 			
-					image(get(files[i]), ann=FALSE,axes=FALSE,col=cols, zlim=zlim, xlim=xlim,ylim=ylim,add=TRUE)
-					# image(region.mask, ann=FALSE,axes=FALSE,col=dim.col, zlim=zlim,xlim=xlim,ylim=ylim,add=TRUE)
+					
+					image(blank.asc, ann=FALSE,axes=FALSE,col='white',xlim=xlim,ylim=ylim)
+					rect(100,-50,165,-5, col='grey90')
+					image(get(files[i]), ann=FALSE,axes=FALSE,col=cols, zlim=zlim, add=TRUE)
 					plot(tpoly,add=TRUE,border='grey20',lwd=2)
 					
 					if (i==1) { mtext('Low (RCP4.5)', line=1,side=3,cex=2,font=2)
@@ -119,7 +117,7 @@ for (clim.var in clim.vars) {
 				plot(tpoly,add=TRUE,col="black",border="black")
 				
 				plot(1:20,axes=FALSE, ann=FALSE,type = "n")
-				text(0.2, 17, 'Figure 1: Change in annual mean temperature for a low and high emissions scenario in 2085.', cex=2,pos=4)
+				text(0.2, 17, paste('Figure 1: Change in annual mean ',clim.var,' for a low and high emissions scenario in 2085.',sep=''), cex=2,pos=4)
 				text(0.2, 13, 'The 10th, 50th and 90th percentiles show variation between 18 GCMs.', cex=2,pos=4)
 				text(0.2, 9, 'The middle model (50th percentile) of the high emissions scenario is our best estimate of the current trajectory.', cex=2,pos=4)
 				
@@ -130,4 +128,5 @@ for (clim.var in clim.vars) {
 		}
 			
 	}
- }			
+}
+ 			
