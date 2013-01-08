@@ -3,7 +3,7 @@ library(SDMTools)
 sh.dir='/home/jc148322/scripts/AP02/richness.sh/';dir.create(sh.dir) #dir to write sh scripts to
 
 famdata=read.csv('/scratch/jc148322/AP02/sp_fam_class.csv',as.is=T)
-tax='birds'
+tax='mammals' #or tax='birds'  tax='reptiles' tax='mammals' tax='amphibians'
 famdata=famdata[which(famdata$class==tax),]
 families=unique(famdata$family)
 
@@ -11,7 +11,7 @@ ESs=c('RCP3PD','RCP45','RCP6','RCP85')
 YEARs=seq(2015,2085,10)
 
 setwd(sh.dir)
-for (tfam in families[51:length(families)]){
+for (tfam in families){
 	for (es in ESs) {
 		for (yr in YEARs) { 
 	
@@ -41,7 +41,7 @@ library(SDMTools)
 sh.dir='/home/jc148322/scripts/AP02/richness.sh/';dir.create(sh.dir) #dir to write sh scripts to
 
 famdata=read.csv('/scratch/jc148322/AP02/sp_fam_class.csv',as.is=T)
-tax='birds'
+tax='mammals'
 famdata=famdata[which(famdata$class==tax),]
 families=unique(famdata$family)
 yr=1990

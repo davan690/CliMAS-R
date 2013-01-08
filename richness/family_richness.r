@@ -9,7 +9,7 @@ base.asc=make.base.asc(base.asc)
 work.dir=paste('/scratch/jc148322/AP02/',tax, '/models/',sep="")
 out.dir=paste('/scratch/jc148322/AP02/',tax, '/richness/',sep="");dir.create(out.dir)
 famdata=read.csv('/scratch/jc148322/AP02/sp_fam_class.csv',as.is=T)
-tax='birds'
+
 famdata=famdata[which(famdata$class==tax),]
 species=famdata$species[which(famdata$family==tfam)]	
 	trichness=base.asc
@@ -25,7 +25,7 @@ species=famdata$species[which(famdata$family==tfam)]
 		threshold = read.csv('maxentResults.csv'); 
 		threshold = threshold$Equate.entropy.of.thresholded.and.original.distributions.logistic.threshold[1]#extract the species threshold value
 
-		tasc[which(tasc<threshold)]=0; tasc[which(tasc>threshold)]=1
+		tasc[which(tasc<threshold)]=0; tasc[which(tasc>=threshold)]=1
 		
 		trichness=trichness+tasc
 		
