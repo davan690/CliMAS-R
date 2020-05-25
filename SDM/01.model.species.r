@@ -1,12 +1,19 @@
 #drafted by Jeremy VanDerWal ( jjvanderwal@gmail.com ... www.jjvanderwal.com )
 #GNU General Public License .. feel free to use / distribute ... no warranties
 
+# myPaths <- .libPaths("C:/Program Files/R/R-3.6.2/library")
+# myPaths <- c(myPaths)
+# .libPaths(myPaths)  # add new path
+# .libPaths()
+
 ################################################################################
+
 library(SDMTools) #load the necessary libraries
+
 
 wd = '/home/jc148322/AP02/working.data/'; setwd(wd) #define and set theworking directory
 climate.dir = '/home/jc165798/Climate/CIAS/Australia/5km/baseline.76to05/bioclim/' #define the climate directory
-species.data=read.csv('/home/jc148322/AP02/vetting_clips/clipaction_final.csv',as.is=TRUE)
+species.data = read.csv('/home/jc148322/AP02/vetting_clips/clipaction_final.csv',as.is=TRUE)
 taxa=c('amphibians','reptiles','mammals')
 
 
